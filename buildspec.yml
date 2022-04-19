@@ -5,7 +5,7 @@ env:
   parameter-store:
     docker_user: /CodeBuild/docker_user
     docker_pwd: /CodeBuild/docker_pwd
-    argoToken: /CodeBuild/argoToken
+    argopwd: /CodeBuild/argopwd
 
 phases:
   install:
@@ -41,10 +41,9 @@ phases:
 
       # argo deploy option
       - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
-      - export ARGOCD_AUTH_TOKEN=$argoToken
       - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v2.3.3/argocd-linux-amd64
       - chmod +x ./argocd
-      - argocd login $ARGOCD_SERVER --auth-token $argoToken
+      - argocd login $ARGOCD_SERVER --username newlocaluser1 --password $argopwd --insecure
       - argocd app sync $argoAppName
       - argocd app wait $argoAppName
 artifacts:
