@@ -42,7 +42,8 @@ phases:
       # argo deploy option
       - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
       - export ARGOCD_AUTH_TOKEN=$argoToken
-      - curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+      - curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.3.3/argocd-linux-amd64
+      - argocd login $ARGOCD_SERVER --auth-token $argoToken
       - argocd app sync $argoAppName
       - argocd app wait $argoAppName
 artifacts:
