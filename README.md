@@ -14,3 +14,8 @@ In the hello-k8s.yml file, you will find the Kubernetes [service](https://kubern
 [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) definitions. The service is configured with
 a [LoadBalancer](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/) which prompts Kubernetes
 to launch an external load balancer using an [AWS ELB](https://aws.amazon.com/elasticloadbalancing/).
+
+# argo app intial setup
+argocd repo add https://github.com/season1946/eks-workshop-sample-api-service-go --username usetoken --password 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
+
+argocd app create argo-hello --repo https://github.com/season1946/eks-workshop-sample-api-service-go.git --path k8s-deploy --dest-server https://kubernetes.default.svc --dest-namespace default
