@@ -41,11 +41,12 @@ phases:
       - printf '[{"name":"hello-k8s","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
 
       # argo deploy option
-      - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
-      - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v2.3.3/argocd-linux-amd64
-      - chmod +x ./argocd
-      - argocd login $ARGOCD_SERVER --username newlocaluser1 --password $argopwd --insecure
-      - argocd app sync $argoAppName
-      - argocd app wait $argoAppName
+      # disable since enable auto sync on arcgo server
+      # - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
+      # - curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/v2.3.3/argocd-linux-amd64
+      # - chmod +x ./argocd
+      # - argocd login $ARGOCD_SERVER --username newlocaluser1 --password $argopwd --insecure
+      # - argocd app sync $argoAppName
+      # - argocd app wait $argoAppName
 artifacts:
   files: build.json
