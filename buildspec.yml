@@ -9,24 +9,34 @@ env:
 
 phases:
   install:
+    runtime-versions:
+      python: 3.8
     commands:
       - curl -sS -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
       - curl -sS -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
       - chmod +x ./kubectl ./aws-iam-authenticator
       - export PATH=$PWD/:$PATH
       - apt-get update && apt-get -y install jq python3-pip python3-dev && pip3 install --upgrade awscli
+      # trivy
+      - "apt update"
+      - "apt install rpm -y"
+      - "pip3 install boto3"
+      - "wget https://github.com/aquasecurity/trivy/releases/download/v0.1.6/trivy_0.1.6_Linux-64bit.deb"
+      - "dpkg -i trivy_0.1.6_Linux-64bit.deb"
   pre_build:
       commands:
         - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
-        - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' k8s-deploy/hello-k8s.yml
-        - cat k8s-deploy/hello-k8s.yml
+        # for argo, cannot modify image here, too late.
+        #- sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' k8s-deploy/hello-k8s.yml
+        #- cat k8s-deploy/hello-k8s.yml
         - $(aws ecr get-login --no-include-email)
         - export KUBECONFIG=$HOME/.kube/config
   build:
     commands:
       - docker login -u $docker_user -p $docker_pwd
       - docker build --tag $REPOSITORY_URI:$TAG .
-
+      - trivy -f json -o results.json --exit-code 0 --severity HIGH,MEDIUM,LOW --quiet --auto-refresh $REPOSITORY_URI:$TAG
+      - trivy -f json -o results.json --exit-code 1 --severity HIGH,CRITICAL --quiet --auto-refresh $REPOSITORY_URI:$TAG
   post_build:
     commands:
       - docker push $REPOSITORY_URI:$TAG
@@ -49,3 +59,7 @@ phases:
       - argocd app wait $argoAppName
 artifacts:
   files: build.json
+  commands:
+      - echo trivy scan completed on `date`
+      - python3 sechub_parser.py
+      - echo Report Sent to Security Hub on `date`
