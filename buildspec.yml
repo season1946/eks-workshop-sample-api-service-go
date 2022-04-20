@@ -50,9 +50,7 @@ phases:
       # - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
       # - kubectl apply -f hello-k8s.yml
       - printf '[{"name":"hello-k8s","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
-      - echo trivy scan completed on `date`
-      - python3 sechub_parser.py
-      - echo Report Sent to Security Hub on `date`
+
       # argo deploy option
       # disable since enable auto sync on arcgo server
       # - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
@@ -62,4 +60,4 @@ phases:
       # - argocd app sync $argoAppName
       # - argocd app wait $argoAppName
 artifacts:
-  files: results-h.json
+  files: results-h.json,results-c.json
