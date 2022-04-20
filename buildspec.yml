@@ -21,8 +21,8 @@ phases:
       - "apt update"
       - "apt install rpm -y"
       - "pip3 install boto3"
-      - "wget https://github.com/aquasecurity/trivy/releases/download/v0.1.6/trivy_0.1.6_Linux-64bit.deb"
-      - "dpkg -i trivy_0.1.6_Linux-64bit.deb"
+      - "wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb"
+      - "dpkg -i trivy_0.18.3_Linux-64bit.deb"
   pre_build:
       commands:
         - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
@@ -35,8 +35,9 @@ phases:
     commands:
       - docker login -u $docker_user -p $docker_pwd
       - docker build --tag $REPOSITORY_URI:$TAG .
-      - trivy -f json -o results.json --exit-code 0 --severity HIGH,MEDIUM,LOW --quiet --auto-refresh $REPOSITORY_URI:$TAG
-      - trivy -f json -o results.json --exit-code 1 --severity HIGH,CRITICAL --quiet --auto-refresh $REPOSITORY_URI:$TAG
+      - echo $REPOSITORY_URI:$TAG
+      - trivy -f json -o results-h.json --exit-code 0 --severity HIGH,MEDIUM,LOW --quiet --auto-refresh $REPOSITORY_URI:$TAG
+      - trivy -f json -o results-c.json --exit-code 1 --severity CRITICAL --quiet --auto-refresh $REPOSITORY_URI:$TAG
   post_build:
     commands:
       - docker push $REPOSITORY_URI:$TAG
@@ -49,7 +50,9 @@ phases:
       # - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
       # - kubectl apply -f hello-k8s.yml
       - printf '[{"name":"hello-k8s","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
-
+      - echo trivy scan completed on `date`
+      - python3 sechub_parser.py
+      - echo Report Sent to Security Hub on `date`
       # argo deploy option
       # disable since enable auto sync on arcgo server
       # - export ARGOCD_SERVER=a62298880f1dc44ab968b434c19cd6c5-799078820.us-east-1.elb.amazonaws.com
@@ -59,8 +62,4 @@ phases:
       # - argocd app sync $argoAppName
       # - argocd app wait $argoAppName
 artifacts:
-  files: build.json
-  commands:
-      - echo trivy scan completed on `date`
-      - python3 sechub_parser.py
-      - echo Report Sent to Security Hub on `date`
+  files: results-h.json
