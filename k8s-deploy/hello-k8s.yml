@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: hello-k8s
-          image: 349361870252.dkr.ecr.us-east-1.amazonaws.com/eksws-codepipeline-ecrdockerrepository-hh4gdewzhgcn:eks-workshop-sample-api-service-go.master..2022-04-20.01.38.02.0f145532
+          image: 349361870252.dkr.ecr.us-east-1.amazonaws.com/eksws-codepipeline-ecrdockerrepository-hh4gdewzhgcn:eks-workshop-sample-api-service-go.master..2022-04-20.14.36.15.a8077a36
           securityContext:
             privileged: false
             readOnlyRootFilesystem: true
